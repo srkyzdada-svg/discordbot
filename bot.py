@@ -17,6 +17,19 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 TARGET_CHANNEL_ID = 1464391763996315718  # AICI PUI ID-UL CANALULUI
 
 # =====================================================
+# CONTOR PENTRU ID-URI SECVENȚIALE
+# =====================================================
+
+review_counter = 0
+
+def get_next_review_id():
+    global review_counter
+    review_counter += 1
+    if review_counter > 10000:
+        review_counter = 1
+    return review_counter
+
+# =====================================================
 # ORDER TYPES ȘI PRICES (DIN POZE)
 # =====================================================
 
@@ -385,6 +398,9 @@ def create_review_embed(rating, order, price, message):
     
     # Separator personalizat
     separator = "─" * 30
+    
+    # Generează ID-ul secvențial
+    review_id = get_next_review_id()
 
     # Crează embed-ul în stilul imaginii
     embed = discord.Embed(
@@ -428,7 +444,7 @@ def create_review_embed(rating, order, price, message):
     )
     
     embed.set_footer(
-        text=f"# {random.randint(10000, 99999)} • Brawl Services",
+        text=f"# {review_id:05d} • Brawl Services",
         icon_url="https://cdn.discordapp.com/attachments/123456789/123456789/brawlstars_icon.png"
     )
     
@@ -539,7 +555,7 @@ async def auto_review():
             embed = create_review_embed(rating, order, price, message)
             
             await target_channel.send(embed=embed)
-            print(f"✅ Review automat trimis!")
+            print(f"✅ Review automat trimis! (ID: #{review_counter:05d})")
             
         except Exception as e:
             print(f"❌ Eroare: {e}")

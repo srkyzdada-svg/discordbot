@@ -4,7 +4,8 @@ import random
 import string
 from datetime import datetime
 import asyncio
-import os  # ← TREBUIE SĂ FIE ASTA!
+import os
+
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
@@ -52,15 +53,11 @@ ORDER_PRICES = {
     "Brawl Pass": "4€",
 }
 
-# =====================================================
-# LISTE SEPARATE PENTRU COMENZI
-# =====================================================
-
 ORDER_TYPES = list(ORDER_PRICES.keys())
 PRICES = list(ORDER_PRICES.values())
 
 # =====================================================
-# 100 REVIEW-URI PENTRU PRODUSE
+# REVIEW-URI
 # =====================================================
 
 PRODUCT_REVIEWS = [
@@ -165,13 +162,7 @@ PRODUCT_REVIEWS = [
     "Ranked service is fast and reliable",
     "Win streak boost is amazing",
     "Prestige service is great",
-]
-
-# =====================================================
-# 200 REVIEW-URI GENERALE
-# =====================================================
-
-GENERAL_REVIEWS = [
+    "Great experience, will use again!",
     "Amazing service, highly recommend",
     "Fast and reliable, 10/10",
     "Great service, will order again",
@@ -360,28 +351,93 @@ GENERAL_REVIEWS = [
     "Very happy, thank you",
 ]
 
-# =====================================================
-# COMBINĂ REVIEW-URILE
-# =====================================================
-
-ALL_REVIEWS = PRODUCT_REVIEWS + GENERAL_REVIEWS
-random.shuffle(ALL_REVIEWS)
+random.shuffle(PRODUCT_REVIEWS)
 
 # =====================================================
-# RATING-URI: 50 cu 3/5, 150 cu 4/5, 200 cu 5/5
+# RATING-URI
 # =====================================================
 
 RATINGS = ["3/5"] * 50 + ["4/5"] * 150 + ["5/5"] * 200
 random.shuffle(RATINGS)
 
 # =====================================================
-# DOAR "Anonymous Customer"
+# FUNCȚIE PENTRU CREAREA EMBED-ULUI ÎN STILUL IMAGINII
 # =====================================================
 
-REVIEW_NAMES = ["Anonymous Customer"]
+def create_review_embed(rating, order, price, message):
+    # Determină stelele
+    if rating in ["5/5", "5"]:
+        stars = "⭐⭐⭐⭐⭐"
+        rating_display = "5.0"
+    elif rating in ["4/5", "4"]:
+        stars = "⭐⭐⭐⭐☆"
+        rating_display = "4.0"
+    elif rating in ["3/5", "3"]:
+        stars = "⭐⭐⭐☆☆"
+        rating_display = "3.0"
+    else:
+        stars = "⭐⭐⭐⭐⭐"
+        rating_display = "5.0"
+
+    # Delivery time (random)
+    delivery_times = ["Instant", "2-4 hours", "1-2 hours", "30 minutes"]
+    delivery = random.choice(delivery_times)
+    
+    # Separator personalizat
+    separator = "─" * 30
+
+    # Crează embed-ul în stilul imaginii
+    embed = discord.Embed(
+        title="📝 **NEW REVIEW RECEIVED**",
+        description=(
+            f"**Anonymous Customer**\n"
+            f"🛡️ Verified Buyer\n"
+            f"⭐ Trusted Customer\n"
+            f"📋 100% Real Reviews\n\n"
+            f"{separator}\n\n"
+            f"**📦 Order Type**\n"
+            f"{order}\n\n"
+            f"**💰 Price**\n"
+            f"{price}\n\n"
+            f"**🚚 Delivery**\n"
+            f"{delivery}\n"
+            f"⚡ FAST\n\n"
+            f"{separator}\n\n"
+            f"**⭐ Rating**\n"
+            f"{stars}\n"
+            f"**{rating_display}**\n"
+            f"{rating}\n\n"
+            f"{separator}\n\n"
+            f"*\"{message}\"*\n\n"
+            f"{separator}\n\n"
+            f"✅ Verified Review\n"
+            f"🏆 Brawl Services\n"
+            f"🕐 {datetime.now().strftime('%A at %I:%M %p')}\n\n"
+            f"{separator}\n\n"
+            f"🔒 **Secure Transactions**\n"
+            f"100% Safe & Protected\n\n"
+            f"🕐 **24/7 Support**\n"
+            f"We're always here"
+        ),
+        color=discord.Color.gold()
+    )
+    
+    embed.set_author(
+        name="BrawlServices",
+        icon_url="https://cdn.discordapp.com/attachments/123456789/123456789/brawlstars_icon.png"  # Schimbă cu URL-ul tău
+    )
+    
+    embed.set_footer(
+        text=f"# {random.randint(10000, 99999)} • Brawl Services",
+        icon_url="https://cdn.discordapp.com/attachments/123456789/123456789/brawlstars_icon.png"
+    )
+    
+    embed.timestamp = datetime.now()
+    
+    return embed
 
 # =====================================================
-# COMENZI - CU ORDER TYPE ȘI PRICE DIN POZE
+# COMENZI
 # =====================================================
 
 @bot.command()
@@ -403,50 +459,9 @@ async def review(ctx, rating: str = None, order: str = None, price: str = None, 
         price = random.choice(PRICES)
     
     if message is None:
-        message = random.choice(ALL_REVIEWS)
+        message = random.choice(PRODUCT_REVIEWS)
     
-    # Stele pentru rating
-    if rating == "5/5" or rating == "5":
-        stars = "⭐⭐⭐⭐⭐"
-    elif rating == "4/5" or rating == "4":
-        stars = "⭐⭐⭐⭐☆"
-    elif rating == "3/5" or rating == "3":
-        stars = "⭐⭐⭐☆☆"
-    else:
-        stars = "⭐⭐⭐⭐⭐"
-    
-    embed = discord.Embed(
-        title="📝 NEW REVIEW - Brawl Services",
-        description=f"**Customer**\nAnonymous Customer 🦷",
-        color=discord.Color.gold()
-    )
-    
-    embed.add_field(
-        name="📦 Order Type",
-        value=order,
-        inline=False
-    )
-    
-    embed.add_field(
-        name="⭐ Rating",
-        value=f"{stars}\n**{rating}**",
-        inline=False
-    )
-    
-    embed.add_field(
-        name="💰 Price",
-        value=price,
-        inline=False
-    )
-    
-    embed.add_field(
-        name="💬 Review",
-        value=f"> {message}",
-        inline=False
-    )
-    
-    embed.set_footer(text="✅ Verified Review | Brawl Services")
-    embed.timestamp = datetime.now()
+    embed = create_review_embed(rating, order, price, message)
     
     await target_channel.send(embed=embed)
     await ctx.send(f"✅ Review trimis în {target_channel.mention}!")
@@ -462,84 +477,40 @@ async def reviewrandom(ctx):
     rating = random.choice(RATINGS)
     order = random.choice(ORDER_TYPES)
     price = ORDER_PRICES[order]
-    message = random.choice(ALL_REVIEWS)
+    message = random.choice(PRODUCT_REVIEWS)
     
-    if rating == "5/5" or rating == "5":
-        stars = "⭐⭐⭐⭐⭐"
-    elif rating == "4/5" or rating == "4":
-        stars = "⭐⭐⭐⭐☆"
-    elif rating == "3/5" or rating == "3":
-        stars = "⭐⭐⭐☆☆"
-    else:
-        stars = "⭐⭐⭐⭐⭐"
-    
-    embed = discord.Embed(
-        title="📝 NEW REVIEW - Brawl Services",
-        description=f"**Customer**\nAnonymous Customer 🦷",
-        color=discord.Color.gold()
-    )
-    
-    embed.add_field(
-        name="📦 Order Type",
-        value=order,
-        inline=False
-    )
-    
-    embed.add_field(
-        name="⭐ Rating",
-        value=f"{stars}\n**{rating}**",
-        inline=False
-    )
-    
-    embed.add_field(
-        name="💰 Price",
-        value=price,
-        inline=False
-    )
-    
-    embed.add_field(
-        name="💬 Review",
-        value=f"> {message}",
-        inline=False
-    )
-    
-    embed.set_footer(text="✅ Verified Review | Brawl Services")
-    embed.timestamp = datetime.now()
+    embed = create_review_embed(rating, order, price, message)
     
     await target_channel.send(embed=embed)
     await ctx.send(f"✅ Review random trimis în {target_channel.mention}!")
-
-# =====================================================
-# HELP
-# =====================================================
 
 @bot.command()
 async def helpreview(ctx):
     embed = discord.Embed(
         title="🤖 Brawl Services - Review Bot",
-        description="Generate fake reviews with Order Type and Price!",
+        description="Generează review-uri în stilul Brawl Services!",
         color=discord.Color.blue()
     )
     
     embed.add_field(
         name="!review [rating] [order] [price] [message]",
-        value='Example: `!review "5/5" "King Frank Method" "10€" "Great service!"`',
+        value='Exemplu: `!review "5/5" "Brawl Pass" "4€" "Great service!"`',
         inline=False
     )
     
     embed.add_field(
         name="!reviewrandom",
-        value="Generate a random review with random order and price",
+        value="Generează un review random",
         inline=False
     )
     
     embed.add_field(
         name="!helpreview",
-        value="Show this help message",
+        value="Afișează acest mesaj",
         inline=False
     )
     
-    embed.set_footer(text="Brawl Services - Fake Reviews")
+    embed.set_footer(text="Brawl Services - Review Bot")
     
     await ctx.send(embed=embed)
 
@@ -563,49 +534,9 @@ async def auto_review():
             rating = random.choice(RATINGS)
             order = random.choice(ORDER_TYPES)
             price = ORDER_PRICES[order]
-            message = random.choice(ALL_REVIEWS)
+            message = random.choice(PRODUCT_REVIEWS)
             
-            if rating == "5/5" or rating == "5":
-                stars = "⭐⭐⭐⭐⭐"
-            elif rating == "4/5" or rating == "4":
-                stars = "⭐⭐⭐⭐☆"
-            elif rating == "3/5" or rating == "3":
-                stars = "⭐⭐⭐☆☆"
-            else:
-                stars = "⭐⭐⭐⭐⭐"
-            
-            embed = discord.Embed(
-                title="📝 NEW REVIEW - Brawl Services",
-                description=f"**Customer**\nAnonymous Customer 🦷",
-                color=discord.Color.gold()
-            )
-            
-            embed.add_field(
-                name="📦 Order Type",
-                value=order,
-                inline=False
-            )
-            
-            embed.add_field(
-                name="⭐ Rating",
-                value=f"{stars}\n**{rating}**",
-                inline=False
-            )
-            
-            embed.add_field(
-                name="💰 Price",
-                value=price,
-                inline=False
-            )
-            
-            embed.add_field(
-                name="💬 Review",
-                value=f"> {message}",
-                inline=False
-            )
-            
-            embed.set_footer(text="✅ Verified Review | Brawl Services")
-            embed.timestamp = datetime.now()
+            embed = create_review_embed(rating, order, price, message)
             
             await target_channel.send(embed=embed)
             print(f"✅ Review automat trimis!")
@@ -618,16 +549,12 @@ async def auto_review():
 # START
 # =====================================================
 
-# =====================================================
-# START
-# =====================================================
-
 @bot.event
 async def on_ready():
     print(f'✅ Bot connected as {bot.user}')
     print(f'🚀 Started successfully!')
     print(f'📝 Commands: !review, !reviewrandom, !helpreview')
-    print(f'📚 Loaded {len(ALL_REVIEWS)} reviews')
+    print(f'📚 Loaded {len(PRODUCT_REVIEWS)} reviews')
     print(f'📦 {len(ORDER_TYPES)} products available')
     
     target_channel = bot.get_channel(TARGET_CHANNEL_ID)
@@ -642,4 +569,4 @@ async def on_ready():
 # RULEAZĂ CU TOKEN DIN VARIABILĂ DE MEDIU
 # =====================================================
 
-bot.run(os.getenv('DISCORD_TOKEN'))  # ← ASTA E CORECT!
+bot.run(os.getenv('DISCORD_TOKEN'))

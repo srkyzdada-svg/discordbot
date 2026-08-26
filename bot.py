@@ -374,7 +374,7 @@ RATINGS = ["3/5"] * 50 + ["4/5"] * 150 + ["5/5"] * 200
 random.shuffle(RATINGS)
 
 # =====================================================
-# FUNCȚIE PENTRU CREAREA EMBED-ULUI ÎN STILUL IMAGINII
+# FUNCȚIE PENTRU CREAREA EMBED-ULUI EXACT CA ÎN IMAGINE
 # =====================================================
 
 def create_review_embed(rating, order, price, message):
@@ -396,43 +396,47 @@ def create_review_embed(rating, order, price, message):
     delivery_times = ["Instant", "2-4 hours", "1-2 hours", "30 minutes"]
     delivery = random.choice(delivery_times)
     
-    # Separator personalizat
+    # Separator
     separator = "─" * 30
     
     # Generează ID-ul secvențial
     review_id = get_next_review_id()
+    
+    # Obține ziua și ora curentă
+    current_time = datetime.now().strftime('%A at %I:%M %p')
 
-    # Crează embed-ul în stilul imaginii
+    # Crează embed-ul EXACT ca în imagine
     embed = discord.Embed(
-        title="📝 **NEW REVIEW RECEIVED**",
+        title="**NEW REVIEW RECEIVED**",
         description=(
-            f"**Anonymous Customer**\n"
-            f"🛡️ Verified Buyer\n"
-            f"⭐ Trusted Customer\n"
-            f"📋 100% Real Reviews\n\n"
+            f"Anonymous Customer\n"
+            f"Verified Buyer\n\n"
+            f"Trusted Customer\n"
+            f"100% Real Reviews\n\n"
             f"{separator}\n\n"
-            f"**📦 Order Type**\n"
+            f"**Order Type**\n"
             f"{order}\n\n"
-            f"**💰 Price**\n"
+            f"**Price**\n"
             f"{price}\n\n"
-            f"**🚚 Delivery**\n"
+            f"**Delivery**\n"
             f"{delivery}\n"
-            f"⚡ FAST\n\n"
+            f"FAST\n\n"
             f"{separator}\n\n"
-            f"**⭐ Rating**\n"
+            f"**Rating**\n"
             f"{stars}\n"
             f"**{rating_display}**\n"
             f"{rating}\n\n"
             f"{separator}\n\n"
-            f"*\"{message}\"*\n\n"
+            f"**Review**\n"
+            f"“{message}”\n\n"
             f"{separator}\n\n"
-            f"✅ Verified Review\n"
-            f"🏆 Brawl Services\n"
-            f"🕐 {datetime.now().strftime('%A at %I:%M %p')}\n\n"
+            f"**Verified Review**\n"
+            f"Brawl Services\n"
+            f"{current_time}\n\n"
             f"{separator}\n\n"
-            f"🔒 **Secure Transactions**\n"
+            f"**Secure Transactions**\n"
             f"100% Safe & Protected\n\n"
-            f"🕐 **24/7 Support**\n"
+            f"**24/7 Support**\n"
             f"We're always here"
         ),
         color=discord.Color.gold()
@@ -440,11 +444,11 @@ def create_review_embed(rating, order, price, message):
     
     embed.set_author(
         name="BrawlServices",
-        icon_url="https://cdn.discordapp.com/attachments/123456789/123456789/brawlstars_icon.png"  # Schimbă cu URL-ul tău
+        icon_url="https://cdn.discordapp.com/attachments/123456789/123456789/brawlstars_icon.png"
     )
     
     embed.set_footer(
-        text=f"# {review_id:05d} • Brawl Services",
+        text=f"# {review_id:05d}",
         icon_url="https://cdn.discordapp.com/attachments/123456789/123456789/brawlstars_icon.png"
     )
     
